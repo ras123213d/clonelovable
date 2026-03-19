@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin · LovableCloner</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #0f0f13; color: #e2e8f0; min-height: 100vh; }
+
+    /* LOGIN */
+    #loginScreen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px;
+    }
+    .login-box {
+      background: #1a1a24; border: 1px solid #2d2d3d; border-radius: 16px;
+      padding: 40px; width: 100%; max-width: 380px; text-align: center;
+    }
+    .login-box h1 { font-size: 22px; margin-bottom: 8px; }
+    .login-box p { color: #888; font-size: 13px; margin-bottom: 24px; }
+    .login-box input {
+      width: 100%; background: #0f0f13; border: 1.5px solid #2d2d3d;
+      border-radius: 8px; padding: 12px 14px; color: #fff; font-size: 14px;
+      font-family: inherit; outline: none; margin-bottom: 12px;
+    }
+    .login-box input:focus { border-color: #a78bfa; }
+    .login-box button {
+      width: 100%; background: #7c3aed; color: #fff; border: none;
+      border-radius: 8px; padding: 12px; font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
+    .login-box button:hover { background: #6d28d9; }
+    #loginError { color: #ef4444; font-size: 12px; margin-top: 8px; min-height: 16px; }
+
+    /* PAINEL */
+    #panel { display: none; }
+    nav {
+      background: #1a1a24; border-bottom: 1px solid #2d2d3d;
+      padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { font-weight: 800; font-size: 16px; color: #a78bfa; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-right span { font-size: 12px; color: #666; }
+    .btn-logout { background: none; border: 1px solid #3d3d4d; color: #aaa;
+      border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-family: inherit; }
+    .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 28px 20px; }
+
+    /* STATS */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .stat-card {
+      background: #1a1a24; border: 1px solid #2d2d3d; border-radius: 12px;
+      padding: 18px; text-align: center;
+    }
+    .stat-val { font-size: 28px; font-weight: 800; color: #a78bfa; }
+    .stat-label { font-size: 12px; color: #666; margin-top: 4px; }
+
+    /* CRIAR TOKEN */
+    .section { background: #1a1a24; border: 1px solid #2d2d3d; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: #c4b5fd; }
+    .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: .05em; }
+    .form-group input, .form-group select {
+      background: #0f0f13; border: 1.5px solid #2d2d3d; border-radius: 7px;
+      padding: 9px 12px; color: #fff; font-size: 13px; font-family: inherit; outline: none; width: 130px;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: #a78bfa; }
+    .form-group.wide input { width: 200px; }
+    .btn-create {
+      background: #7c3aed; color: #fff; border: none; border-radius: 7px;
+      padding: 9px 18px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+      white-space: nowrap;
+    }
+    .btn-create:hover { background: #6d28d9; }
+
+    /* TOKEN CRIADO */
+    #newTokenBox {
+      display: none; margin-top: 14px; background: #0f0f13;
+      border: 1.5px solid #22c55e; border-radius: 8px; padding: 12px 14px;
+    }
+    #newTokenBox p { font-size: 12px; color: #22c55e; margin-bottom: 6px; }
+    .token-copy-row { display: flex; gap: 8px; }
+    .token-copy-row input {
+      flex: 1; background: #1a1a24; border: 1px solid #2d2d3d; border-radius: 6px;
+      padding: 8px 10px; color: #a78bfa; font-size: 12px; font-family: monospace; outline: none;
+    }
+    .token-copy-row button {
+      background: #22c55e; color: #fff; border: none; border-radius: 6px;
+      padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+
+    /* TABELA */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 10px 12px; color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #2d2d3d; }
+    td { padding: 11px 12px; border-bottom: 1px solid #1e1e2a; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #1e1e2a; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .badge-ok { background: #14532d; color: #4ade80; }
+    .badge-exp { background: #3b1515; color: #f87171; }
+    .badge-full { background: #3b2a00; color: #fbbf24; }
+    .token-val { font-family: monospace; font-size: 11px; color: #888; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn-revoke {
+      background: none; border: 1px solid #3d1515; color: #f87171;
+      border-radius: 5px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: inherit;
+    }
+    .btn-revoke:hover { background: #3b1515; }
+    .empty { text-align: center; color: #555; padding: 30px; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>⚡ Admin Panel</h1>
+    <p>Digite a Admin Key para entrar</p>
+    <input id="adminKeyInput" type="password" placeholder="Admin Key" />
+    <button onclick="login()">Entrar</button>
+    <p id="loginError"></p>
+  </div>
+</div>
+
+<!-- PAINEL -->
+<div id="panel">
+  <nav>
+    <div class="nav-logo">⚡ LovableCloner Admin</div>
+    <div class="nav-right">
+      <span id="navKey"></span>
+      <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat-card"><div class="stat-val" id="statTotal">0</div><div class="stat-label">Tokens criados</div></div>
+      <div class="stat-card"><div class="stat-val" id="statAtivos">0</div><div class="stat-label">Tokens ativos</div></div>
+      <div class="stat-card"><div class="stat-val" id="statClones">0</div><div class="stat-label">Clones realizados</div></div>
+      <div class="stat-card"><div class="stat-val" id="statExpirados">0</div><div class="stat-label">Expirados/Revogados</div></div>
+    </div>
+
+    <!-- CRIAR TOKEN -->
+    <div class="section">
+      <h2>Criar novo token</h2>
+      <div class="form-row">
+        <div class="form-group wide">
+          <label>Nome / Usuário</label>
+          <input id="newLabel" type="text" placeholder="ex: João Silva" />
+        </div>
+        <div class="form-group">
+          <label>Validade (dias)</label>
+          <input id="newDays" type="number" value="1" min="1" max="365" />
+        </div>
+        <div class="form-group">
+          <label>Máx. clones</label>
+          <input id="newMax" type="number" value="10" min="1" max="999" />
+        </div>
+        <button class="btn-create" onclick="criarToken()">+ Criar Token</button>
+      </div>
+      <div id="newTokenBox">
+        <p>✅ Token criado! Copie e envie para o usuário:</p>
+        <div class="token-copy-row">
+          <input id="newTokenVal" type="text" readonly />
+          <button onclick="copiarToken()">Copiar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTA DE TOKENS -->
+    <div class="section">
+      <h2>Tokens</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Usuário</th>
+              <th>Token</th>
+              <th>Status</th>
+              <th>Clones</th>
+              <th>Expira em</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tokenTable"><tr><td colspan="6" class="empty">Nenhum token ainda</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let adminKey = '';
+
+async function login() {
+  const key = document.getElementById('adminKeyInput').value.trim();
+  if (!key) return;
+  const r = await fetch('/admin/tokens', { headers: { 'x-admin-key': key } });
+  if (r.status === 401) { document.getElementById('loginError').textContent = 'Admin Key inválida'; return; }
+  adminKey = key;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('panel').style.display = 'block';
+  document.getElementById('navKey').textContent = 'Key: ' + key.substring(0, 12) + '...';
+  loadTokens();
+}
+
+function logout() {
+  adminKey = '';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('panel').style.display = 'none';
+  document.getElementById('adminKeyInput').value = '';
+}
+
+document.getElementById('adminKeyInput').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+async function loadTokens() {
+  const r = await fetch('/admin/tokens', { headers: { 'x-admin-key': adminKey } });
+  const tokens = await r.json();
+  const tbody = document.getElementById('tokenTable');
+
+  if (!tokens.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Nenhum token ainda</td></tr>'; updateStats([]); return; }
+
+  tbody.innerHTML = tokens.map(t => {
+    const exp = new Date(t.expiresAt);
+    const expired = Date.now() > t.expiresAt;
+    const full = t.usedClones >= t.maxClones;
+    const status = expired ? '<span class="badge badge-exp">Expirado</span>'
+      : full ? '<span class="badge badge-full">Esgotado</span>'
+      : '<span class="badge badge-ok">Ativo</span>';
+    const expStr = expired ? exp.toLocaleDateString('pt-BR') : timeLeft(t.expiresAt);
+    return `<tr>
+      <td>${t.label || '—'}</td>
+      <td><span class="token-val" title="${t.token}">${t.token}</span></td>
+      <td>${status}</td>
+      <td>${t.usedClones} / ${t.maxClones}</td>
+      <td>${expStr}</td>
+      <td><button class="btn-revoke" onclick="revogar('${t.token}')">Revogar</button></td>
+    </tr>`;
+  }).join('');
+
+  updateStats(tokens);
+}
+
+function updateStats(tokens) {
+  const now = Date.now();
+  document.getElementById('statTotal').textContent = tokens.length;
+  document.getElementById('statAtivos').textContent = tokens.filter(t => now < t.expiresAt && t.usedClones < t.maxClones).length;
+  document.getElementById('statClones').textContent = tokens.reduce((s, t) => s + t.usedClones, 0);
+  document.getElementById('statExpirados').textContent = tokens.filter(t => now > t.expiresAt || t.usedClones >= t.maxClones).length;
+}
+
+function timeLeft(ts) {
+  const diff = ts - Date.now();
+  if (diff <= 0) return 'Expirado';
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  return d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+async function criarToken() {
+  const label = document.getElementById('newLabel').value.trim();
+  const hours = (parseInt(document.getElementById('newDays').value) || 1) * 24;
+  const maxClones = parseInt(document.getElementById('newMax').value) || 10;
+
+  const r = await fetch('/admin/token', {
+    method: 'POST',
+    headers: { 'x-admin-key': adminKey, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ label, hours, maxClones })
+  });
+  const data = await r.json();
+  if (data.error) { alert(data.error); return; }
+
+  document.getElementById('newTokenVal').value = data.token;
+  document.getElementById('newTokenBox').style.display = 'block';
+  document.getElementById('newLabel').value = '';
+  loadTokens();
+}
+
+function copiarToken() {
+  const val = document.getElementById('newTokenVal').value;
+  navigator.clipboard.writeText(val).then(() => {
+    const btn = document.querySelector('#newTokenBox button');
+    btn.textContent = 'Copiado!'; btn.style.background = '#16a34a';
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.style.background = ''; }, 2000);
+  });
+}
+
+async function revogar(token) {
+  if (!confirm('Revogar este token?')) return;
+  await fetch('/admin/token/' + token, { method: 'DELETE', headers: { 'x-admin-key': adminKey } });
+  loadTokens();
+}
+
+setInterval(() => { if (adminKey) loadTokens(); }, 10000);
+</script>
+</body>
+</html>
